@@ -133,7 +133,7 @@ jobs:
           cd ${GITHUB_WORKSPACE}/build
           ctest . \
             -j$(nproc) \
-            --timeout 300
+            --timeout 300 || (cat Testing/Temporary/LastTest.log; false)
 
       - name: Re-run tests
         if: always() && (steps.run-ctest.outcome == 'failure')
