@@ -25,14 +25,14 @@ jobs:
       fail-fast: false
 
       matrix:
-        msystem: [UCRT64, CLANG64, CLANGARM64]
+        # flang breaks compiling `use LA_CONSTANTS` # CLANG64, CLANGARM64
         include:
           - msystem: UCRT64
             os: windows-latest
-          - msystem: CLANG64
-            os: windows-latest
-          - msystem: CLANGARM64
-            os: windows-11-arm
+          #- msystem: CLANG64
+          #  os: windows-latest
+          #- msystem: CLANGARM64
+          #  os: windows-11-arm
 
     steps:
       - name: get runner hardware information
