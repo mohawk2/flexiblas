@@ -4,8 +4,6 @@ on:
   push:
   pull_request:
 
-concurrency: ci-windows-mingw-${{ github.ref }}
-
 jobs:
 
   mingw:
