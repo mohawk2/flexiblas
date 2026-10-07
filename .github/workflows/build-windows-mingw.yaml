@@ -41,6 +41,7 @@ jobs:
 
       - name: install MSYS2 build environment
         uses: msys2/setup-msys2@v2
+        id: setup-msys2
         with:
           update: true
 
@@ -132,6 +133,11 @@ jobs:
           ctest . \
             -j$(nproc) \
             --timeout 300 || (cat Testing/Temporary/LastTest.log; false)
+
+      - uses: owenthereal/action-upterm@v2
+        if: always()
+        with:
+          limit-access-to-actor: true
 
       - name: Re-run tests
         if: always() && (steps.run-ctest.outcome == 'failure')
