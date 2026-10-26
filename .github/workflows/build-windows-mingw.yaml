@@ -58,6 +58,7 @@ jobs:
             dlfcn:p
             lapack:p
             openblas:p
+            MinHook:p
 
       - name: checkout repository
         uses: actions/checkout@v5

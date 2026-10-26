@@ -35,6 +35,9 @@
 #ifndef RTLD_DEFAULT
 # define RTLD_DEFAULT   ((void *) 0)
 #endif
+#ifdef _WIN32
+#include <MinHook.h>
+#endif
 
 void flexiblas_internal_xerbla(char *SNAME, Int *Info, flexiblas_fortran_charlen_t len);
 #ifdef FLEXIBLAS_ABI_IBM
@@ -92,6 +95,9 @@ void XERBLA(char *SNAME, Int *Info, flexiblas_fortran_charlen_t len) {
 #endif
 #endif
 
+#if defined(_WIN32)
+static int initialised_MinHook = 0;
+#endif
 
 int __flexiblas_setup_xerbla(flexiblas_backend_t *backend)
 {
@@ -113,6 +119,19 @@ int __flexiblas_setup_xerbla(flexiblas_backend_t *backend)
     } else {
         DPRINTF(1,"Use XERBLA supplied by the user.\n");
         backend->xerbla = xerbla_symbol2;
+#if defined(_WIN32)
+        if (!initialised_MinHook) {
+            if (MH_Initialize() != MH_OK) {
+                DPRINTF_ERROR(0, " Failed to initialise MinHook\n");
+                return 1;
+            }
+            initialised_MinHook = 1;
+        }
+        if (MH_CreateHook(xerbla_symbol2, &flexiblas_internal, NULL) != MH_OK) {
+            DPRINTF_ERROR(0, " Failed to MH_CreateHook\n");
+            return 1;
+        }
+#endif
     }
     return 0;
 }
@@ -266,7 +285,7 @@ CBLAS_INT cblas_errprn(CBLAS_INT ierr, CBLAS_INT info,const char *form, ...)
     else
         return info;
 }
-#if (defined(__APPLE__) || defined(__WIN32__))
+#if (defined(__APPLE__)
 /* This routine is designed for MacOS */
 void internal_cblas_xerbla(CBLAS_INT info, const char *rout, const char *form, ...);
 void cblas_xerbla(CBLAS_INT info, const char *rout, const char *form, ...)
@@ -317,6 +336,19 @@ int __flexiblas_setup_cblas_xerbla(flexiblas_backend_t *backend)
     } else {
         DPRINTF(1, "Use CBLAS_XERBLA supplied by the user.\n");
         backend->cblas_xerbla = xerbla_symbol2;
+#if defined(_WIN32)
+        if (!initialised_MinHook) {
+            if (MH_Initialize() != MH_OK) {
+                DPRINTF_ERROR(0, " Failed to initialise MinHook\n");
+                return 1;
+            }
+            initialised_MinHook = 1;
+        }
+        if (MH_CreateHook(xerbla_symbol2, &flexiblas_internal, NULL) != MH_OK) {
+            DPRINTF_ERROR(0, " Failed to MH_CreateHook\n");
+            return 1;
+        }
+#endif
     }
     return 0;
 }
