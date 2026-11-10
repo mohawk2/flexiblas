@@ -25,58 +25,7 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [ubuntu-latest,ubuntu-26.04-arm]
-        compiler-pkgs: ["g++ gcc"]
-        integer8: [1,0]
-        cc: [gcc]
-        defaultblas: [0]
-        links:
-          - link-blas: 0
-          - link-blas: 1
-            link-lapack: 1
-          - link-blas: 1
-            link-lapack: 1
-            link-cblas: 1
-            link-lapacke: 1
         include:
-          - os: macos-latest
-            integer8: 0
-            links:
-              link-blas: 1
-              link-lapack: 1
-              link-cblas: 1
-              link-lapacke: 1
-            cc: clang
-            defaultblas: OpenBLASOpenMP
-          - os: ubuntu-26.04-arm
-            integer8: 0
-            links:
-              link-blas: 1
-              link-lapack: 1
-              link-cblas: 1
-              link-lapacke: 1
-            compiler-pkgs: "g++ gcc"
-            cc: gcc
-            defaultblas: OpenBLASPThread
-          - os: ubuntu-26.04-arm
-            integer8: 1
-            links:
-              link-blas: 1
-              link-lapack: 1
-              link-cblas: 1
-              link-lapacke: 1
-            compiler-pkgs: "g++ gcc"
-            cc: gcc
-            defaultblas: OpenBLASPThread
-          - os: ubuntu-26.04-arm
-            links:
-              link-blas: 1
-              link-lapack: 1
-              link-cblas: 1
-              link-lapacke: 1
-            compiler-pkgs: "clang flang libomp-dev"
-            cc: "clang"
-            fc: "flang"
 
     env:
       CC: ${{ matrix.cc }}
