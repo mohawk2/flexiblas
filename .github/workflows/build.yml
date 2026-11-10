@@ -26,6 +26,10 @@ jobs:
 
       matrix:
         include:
+           - os: windows-latest
+             msystem: UCRT64
+             cc: gcc
+             defaultblas: OpenBLASOpenMP
 
     env:
       CC: ${{ matrix.cc }}
@@ -38,6 +42,12 @@ jobs:
       - name: get CPU information (macOS)
         if: runner.os == 'macOS'
         run: sysctl -a | grep machdep.cpu
+      - name: get CPU information (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run : |
+          Get-PSDrive -PSProvider FileSystem
+          Get-CIMInstance -Class Win32_Processor | Select-Object -Property Name
 
       - name: set SYSTEM_CORES (Linux)
         shell: bash
@@ -69,9 +79,27 @@ jobs:
         run: |
           brew install gfortran cmake ccache lapack openblas
 
+      - name: install dependencies (Windows)
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          # Use pre-installed version if possible to save disc space on
+          # partition with source.  We need that space for building.
+          release: ${{ matrix.msystem == 'CLANGARM64' }}
+          msystem: ${{ matrix.msystem }}
+          pacboy: >-
+            cc:p
+            fc:p
+            cmake:p
+            ccache:p
+            dlfcn:p
+            lapack:p
+            openblas:p
+
       - name: prepare ccache
         # create key with human readable timestamp
         # used in action/cache/restore and action/cache/save steps
+        shell: bash
         id: ccache-prepare
         run: |
           echo "key=ccache:${{ matrix.os }}:${{ matrix.cc }}:${{ matrix.integer8 && '64' || '32' }}bit:${{ github.ref }}:$(date +"%Y-%m-%d_%H-%M-%S"):${{ github.sha }}" >> $GITHUB_OUTPUT
@@ -88,6 +116,7 @@ jobs:
             ccache:${{ matrix.os }}:${{ matrix.cc }}:${{ matrix.integer8 && '64' || '32' }}bit:
 
       - name: configure ccache
+        shell: bash
         run: |
           test -d ~/.ccache || mkdir ~/.ccache
           echo "max_size = 400M" >> ~/.ccache/ccache.conf
@@ -120,6 +149,7 @@ jobs:
           ) >> "$GITHUB_ENV"
 
       - name: configure
+        shell: bash
         run: |
           cmake -B ${GITHUB_WORKSPACE}/build \
             -DCMAKE_BUILD_TYPE="Debug" \
@@ -133,6 +163,7 @@ jobs:
             ${{ matrix.defaultblas && format('-DFLEXIBLAS_DEFAULT_BLAS={0}$I8SUFFIX',matrix.defaultblas) || '' }} \
 
       - name: build
+        shell: bash
         run: |
           cmake --build ${GITHUB_WORKSPACE}/build -j$SYSTEM_CORES
 
@@ -149,10 +180,12 @@ jobs:
           key: ${{ steps.ccache-prepare.outputs.key }}
 
       - name: install
+        shell: bash
         run: |
           cmake --install ${GITHUB_WORKSPACE}/build
 
       - name: check
+        shell: bash
         id: run-ctest
         timeout-minutes: 150
         env:
