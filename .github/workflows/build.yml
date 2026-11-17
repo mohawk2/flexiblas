@@ -63,15 +63,15 @@ jobs:
               link-lapacke: 1
             cc: gcc
             defaultblas: OpenBLASOpenMP
-#          - os: windows-latest
-#            links:
-#              link-blas: 1
-#              link-lapack: 1
-#              link-cblas: 1
-#              link-lapacke: 1
-#            cc: cl
-#            fc: ifx
-#            defaultblas: OpenBLASPThread
+          - os: windows-latest
+            links:
+              link-blas: 1
+              link-lapack: 1
+              link-cblas: 1
+              link-lapacke: 1
+            cc: cl
+            fc: ifx
+            defaultblas: OpenBLASPThread
           - os: ubuntu-26.04-arm
             integer8: 0
             links:
