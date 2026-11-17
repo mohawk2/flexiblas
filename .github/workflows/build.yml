@@ -197,6 +197,11 @@ jobs:
             echo "CI_LIB_LAPACKE=${{ matrix.links.link-lapacke && '$(conda_get lib $(conda_json liblapacke))' || '' }}"
           ) >> "$GITHUB_ENV"
 
+      - uses: owenthereal/action-upterm@v2
+        if: 0 # always()
+        with:
+          limit-access-to-actor: true
+
       - name: restore ccache
         # setup the GitHub cache used to maintain the ccache from one job to the next
         uses: actions/cache/restore@v6
